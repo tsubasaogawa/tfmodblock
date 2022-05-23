@@ -7,7 +7,7 @@ variable "bar" {
 }
 
 variable "baz" {
-  type = any
+  type = map(number)
 }
 
 variable "lorem" {
@@ -16,11 +16,4 @@ variable "lorem" {
 
 variable "ipsum" {
   type = object({ a = string })
-}
-
-variable "taro" {
-}
-
-variable "no" {
-  type = abc
 }

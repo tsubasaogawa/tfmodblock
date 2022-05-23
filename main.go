@@ -1,50 +1,96 @@
-/*
-memo
-- object の扱い
-  - 展開するためには object を自前でパースする必要がある？
-- unknown な型の扱い
-*/
-
-// main package is the main of tfvergen.
+// main package is the main of tfmodblock.
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"text/template"
 
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
-const VERSION string = "0.0.1"
+// Variable is Terraform variable object.
+type Variable struct {
+	Type string
+	Name string
+}
 
-func getRequiredVersion() (string, error) {
-	module, _ := tfconfig.LoadModule(".")
-	/*
-		if len(module.RequiredCore) < 1 {
-			return "", fmt.Errorf("tfvergen %s\nThere is no required version.", VERSION)
+// ModuleBlock is an output text consisted of variables.
+type ModuleBlock struct {
+	Name      string
+	Variables []Variable
+}
+
+const VERSION string = "0.0.0"
+const TMPL_FILE string = "module_block.tmpl"
+
+// applyModuleBlock
+func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
+	for k, v := range vars {
+		r := regexp.MustCompile(`\w+`)
+		tp := r.FindString(v.Type)
+		if tp == "" {
+			tp = v.Type
 		}
-	*/
-	variables := module.Variables
-	for k, v := range variables {
-		fmt.Printf("%s: %s\n", k, v.Type)
+		mb.Variables = append(mb.Variables, Variable{Type: tp, Name: k})
 	}
+	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
+}
 
-	/*
-		r := regexp.MustCompile(`\d+\.\d+\.\d+`)
-		version := r.FindString(constraint)
-		if version == "" {
-			fmt.Fprintf(os.Stderr, "Fail to extract version from %s\n", constraint)
-		}
-	*/
+// generateFuncMap
+func generateFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"convertTypeToLiteral": func(_type string) string {
+			switch _type {
+			case "string":
+				return "\"\""
+			case "number":
+				return "0"
+			case "list", "set", "tuple":
+				return "[]"
+			case "bool":
+				return "true/false"
+			case "object", "map":
+				return "{}"
+			default:
+				return "null"
+			}
+		},
+	}
+}
 
-	return "", nil
+// generateModuleBlock generates Terraform module block.
+func generateModuleBlock(path string) (string, error) {
+	module, _ := tfconfig.LoadModule(path)
+
+	modBlock := new(ModuleBlock)
+	fullpath, _ := filepath.Abs(path)
+	modBlock.Name = filepath.Base(fullpath)
+	applyModuleBlock(modBlock, module.Variables)
+
+	block, err := template.New(TMPL_FILE).Funcs(generateFuncMap()).ParseFiles(TMPL_FILE)
+	if err != nil {
+		return "", err
+	}
+	buffer := &bytes.Buffer{}
+	block.Execute(buffer, modBlock)
+
+	return buffer.String(), nil
 }
 
 func main() {
-	version, err := getRequiredVersion()
+	path := "."
+	if len(os.Args) > 1 {
+		path = os.Args[1]
+	}
+	block, err := generateModuleBlock(path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("%s\n", version)
+	fmt.Println(block)
 }
