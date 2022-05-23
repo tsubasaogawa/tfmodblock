@@ -1,4 +1,4 @@
-module github.com/tsubasaogawa/terraform-module-block-generator
+module github.com/tsubasaogawa/tfmodblock
 
 go 1.18
 
