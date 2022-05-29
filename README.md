@@ -52,5 +52,4 @@ module "tfmodblock" {
 - Create test code
 - Auto indent
 - Expand `object`
-- Remove the empty line before `}`
 - VSCode Extension
