@@ -1,6 +1,6 @@
 module "{{ .Name }}" {
-    source = "path/to/module"
-    {{ range $i, $var := .Variables -}}
-    {{ $var.Name }} = {{ convertTypeToLiteral $var.Type }}
-    {{ end }}
+    source = "path/to/{{ .Name }}"
+    {{ range $i, $var := .Variables }}
+    {{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}
+{{ end }}
 }
