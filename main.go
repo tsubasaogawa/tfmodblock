@@ -79,7 +79,7 @@ func generateModuleBlock(path string) (string, error) {
 		return "", err
 	}
 
-	block, err := template.New(TMPL_FILE).Funcs(generateFuncMap()).Parse(s)
+	block, err := template.New("tmpl").Funcs(generateFuncMap()).Parse(s)
 	if err != nil {
 		return "", err
 	}
