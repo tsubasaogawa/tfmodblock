@@ -10,6 +10,7 @@ import (
 	"sort"
 	"text/template"
 
+	"github.com/gobuffalo/packr/v2"
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
@@ -72,7 +73,13 @@ func generateModuleBlock(path string) (string, error) {
 	modBlock.Name = filepath.Base(fullpath)
 	applyModuleBlock(modBlock, module.Variables)
 
-	block, err := template.New(TMPL_FILE).Funcs(generateFuncMap()).ParseFiles(TMPL_FILE)
+	box := packr.New("root", ".")
+	s, err := box.FindString(TMPL_FILE)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := template.New(TMPL_FILE).Funcs(generateFuncMap()).Parse(s)
 	if err != nil {
 		return "", err
 	}
