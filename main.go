@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,7 +11,6 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/gobuffalo/packr/v2"
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
@@ -28,6 +28,11 @@ type ModuleBlock struct {
 
 const VERSION string = "0.0.0"
 const TMPL_FILE string = "module_block.tmpl"
+
+var (
+	//go:embed module_block.tmpl
+	tmpl string
+)
 
 // applyModuleBlock
 func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
@@ -73,13 +78,7 @@ func generateModuleBlock(path string) (string, error) {
 	modBlock.Name = filepath.Base(fullpath)
 	applyModuleBlock(modBlock, module.Variables)
 
-	box := packr.New("root", ".")
-	s, err := box.FindString(TMPL_FILE)
-	if err != nil {
-		return "", err
-	}
-
-	block, err := template.New("tmpl").Funcs(generateFuncMap()).Parse(s)
+	block, err := template.New("block").Funcs(generateFuncMap()).Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
