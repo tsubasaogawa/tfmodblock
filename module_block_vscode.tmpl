@@ -1,0 +1,3 @@
+{{ range $i, $var := .Variables }}
+    {{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}
+{{ end }}

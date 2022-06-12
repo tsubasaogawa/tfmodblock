@@ -4,6 +4,7 @@ package main
 import (
 	"bytes"
 	_ "embed"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -26,12 +27,13 @@ type ModuleBlock struct {
 	Variables []Variable
 }
 
-const VERSION string = "0.0.0"
-const TMPL_FILE string = "module_block.tmpl"
+const VERSION string = "0.0.4"
 
 var (
 	//go:embed module_block.tmpl
 	tmpl string
+	//go:embed module_block_vscode.tmpl
+	vsc_tmpl string
 )
 
 // applyModuleBlock
@@ -70,7 +72,7 @@ func generateFuncMap() template.FuncMap {
 }
 
 // generateModuleBlock generates Terraform module block.
-func generateModuleBlock(path string) (string, error) {
+func generateModuleBlock(path string, vscode bool) (string, error) {
 	module, _ := tfconfig.LoadModule(path)
 
 	modBlock := new(ModuleBlock)
@@ -78,7 +80,12 @@ func generateModuleBlock(path string) (string, error) {
 	modBlock.Name = filepath.Base(fullpath)
 	applyModuleBlock(modBlock, module.Variables)
 
-	block, err := template.New("block").Funcs(generateFuncMap()).Parse(tmpl)
+	_template := tmpl
+	if vscode {
+		_template = vsc_tmpl
+	}
+
+	block, err := template.New("block").Funcs(generateFuncMap()).Parse(_template)
 	if err != nil {
 		return "", err
 	}
@@ -89,11 +96,23 @@ func generateModuleBlock(path string) (string, error) {
 }
 
 func main() {
-	path := "."
-	if len(os.Args) > 1 {
-		path = os.Args[1]
+	var (
+		v      = flag.Bool("v", false, "tfmodblock version")
+		vscode = flag.Bool("vscode", false, "VSCode extension mode")
+	)
+	flag.Parse()
+
+	if *v {
+		fmt.Println(VERSION)
+		os.Exit(0)
 	}
-	block, err := generateModuleBlock(path)
+
+	path := "."
+	if flag.NArg() > 0 {
+		path = flag.Arg(0)
+	}
+
+	block, err := generateModuleBlock(path, *vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
