@@ -12,7 +12,7 @@ Copy the binary to your PATH.
 ## Example
 
 ```hcl
-$ cat variables.tf
+$ cat example.tf
 variable "foo" {
   type = string
 }
