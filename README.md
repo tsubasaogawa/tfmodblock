@@ -6,8 +6,16 @@ tfmodblock generates Terraform module block from variable blocks.
 
 ## Install
 
-Download a binary from Releases page.
-Copy the binary to your PATH.
+### Use install script
+
+```bash
+curl -H 'Accept: application/vnd.github.VERSION.raw' 'https://api.github.com/repos/tsubasaogawa/tfmodblock/contents/install.sh?ref=main' | bash
+```
+
+### Download an archive
+
+Download an archive from [Releases](https://github.com/tsubasaogawa/tfmodblock/releases/latest) page.
+Extract it and copy the binary to your PATH.
 
 ## Example
 
