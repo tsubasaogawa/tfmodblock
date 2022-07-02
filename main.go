@@ -27,7 +27,7 @@ type ModuleBlock struct {
 	Variables []Variable
 }
 
-const VERSION string = "0.0.4"
+const VERSION string = "0.0.5"
 
 var (
 	//go:embed module_block.tmpl
@@ -73,6 +73,9 @@ func generateFuncMap() template.FuncMap {
 
 // generateModuleBlock generates Terraform module block.
 func generateModuleBlock(path string, vscode bool) (string, error) {
+	if !tfconfig.IsModuleDir(path) {
+		return "", fmt.Errorf("given path does not contain tf files")
+	}
 	module, _ := tfconfig.LoadModule(path)
 
 	modBlock := new(ModuleBlock)
