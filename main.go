@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
@@ -47,8 +48,16 @@ func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
 			tp = v.Type
 		}
 		desc := v.Description
-		df := v.Default
-		mb.Variables = append(mb.Variables, Variable{Type: tp, Name: k, Description: desc, Default: df})
+
+		var df interface{}
+		// TODO: enable default for map and object as well
+		if v.Default != nil && (tp == "string" || tp == "number" || strings.HasPrefix(tp, "list(")) {
+			df = v.Default
+		}
+		mb.Variables = append(
+			mb.Variables,
+			Variable{Type: tp, Name: k, Description: desc, Default: df},
+		)
 	}
 	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
 }
