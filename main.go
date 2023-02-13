@@ -17,8 +17,10 @@ import (
 
 // Variable is Terraform variable object.
 type Variable struct {
-	Type string
-	Name string
+	Type        string
+	Name        string
+	Description string
+	Default     interface{}
 }
 
 // ModuleBlock is an output text consisted of variables.
@@ -27,7 +29,7 @@ type ModuleBlock struct {
 	Variables []Variable
 }
 
-const VERSION string = "0.0.5"
+const VERSION string = "0.0.6"
 
 var (
 	//go:embed module_block.tmpl
@@ -44,7 +46,9 @@ func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
 		if tp == "" {
 			tp = v.Type
 		}
-		mb.Variables = append(mb.Variables, Variable{Type: tp, Name: k})
+		desc := v.Description
+		df := v.Default
+		mb.Variables = append(mb.Variables, Variable{Type: tp, Name: k, Description: desc, Default: df})
 	}
 	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
 }
