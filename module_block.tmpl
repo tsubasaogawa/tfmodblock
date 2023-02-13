@@ -5,7 +5,7 @@ module "{{ .Name }}" {
     {{ if ne $var.Description "" -}}
     // {{ $var.Description }}
     {{ end -}}
-    {{ if $var.Default -}}
+    {{ if ne $var.Default nil -}}
     {{ $var.Name }} = {{ $var.Default -}}
     {{ else -}}
     {{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}

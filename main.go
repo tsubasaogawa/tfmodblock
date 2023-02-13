@@ -39,8 +39,8 @@ var (
 	vsc_tmpl string
 )
 
-// applyModuleBlock
-func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
+// constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
+func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, def bool) {
 	for k, v := range vars {
 		r := regexp.MustCompile(`\w+`)
 		tp := r.FindString(v.Type)
@@ -51,7 +51,7 @@ func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
 
 		var df interface{}
 		// TODO: enable default for map and object as well
-		if v.Default != nil && (tp == "string" || tp == "number" || strings.HasPrefix(tp, "list(")) {
+		if def && v.Default != nil && (tp == "string" || tp == "number" || tp == "bool" || strings.HasPrefix(tp, "list(")) {
 			df = v.Default
 		}
 		mb.Variables = append(
@@ -84,8 +84,8 @@ func generateFuncMap() template.FuncMap {
 	}
 }
 
-// generateModuleBlock generates Terraform module block.
-func generateModuleBlock(path string, vscode bool) (string, error) {
+// printModuleBlock outputs Terraform module block.
+func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
@@ -94,7 +94,8 @@ func generateModuleBlock(path string, vscode bool) (string, error) {
 	modBlock := new(ModuleBlock)
 	fullpath, _ := filepath.Abs(path)
 	modBlock.Name = filepath.Base(fullpath)
-	applyModuleBlock(modBlock, module.Variables)
+	// The result from tfconfig is used to construct modBlock
+	constructModuleBlock(modBlock, module.Variables, def)
 
 	_template := tmpl
 	if vscode {
@@ -114,6 +115,7 @@ func generateModuleBlock(path string, vscode bool) (string, error) {
 func main() {
 	var (
 		v      = flag.Bool("v", false, "tfmodblock version")
+		def    = flag.Bool("default", true, "use default value if exists")
 		vscode = flag.Bool("vscode", false, "VSCode extension mode")
 	)
 	flag.Parse()
@@ -128,7 +130,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := generateModuleBlock(path, *vscode)
+	block, err := printModuleBlock(path, *def, *vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
