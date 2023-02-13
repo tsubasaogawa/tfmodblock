@@ -16,18 +16,10 @@ import (
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
-// Variable is Terraform variable object.
-type Variable struct {
-	Type        string
-	Name        string
-	Description string
-	Default     interface{}
-}
-
-// ModuleBlock is an output text consisted of variables.
+// ModuleBlock includes output values consisted of variables.
 type ModuleBlock struct {
 	Name      string
-	Variables []Variable
+	Variables []tfconfig.Variable
 }
 
 const VERSION string = "0.0.6"
@@ -43,6 +35,7 @@ var (
 func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, def bool) {
 	for k, v := range vars {
 		r := regexp.MustCompile(`\w+`)
+
 		tp := r.FindString(v.Type)
 		if tp == "" {
 			tp = v.Type
@@ -56,7 +49,7 @@ func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, d
 		}
 		mb.Variables = append(
 			mb.Variables,
-			Variable{Type: tp, Name: k, Description: desc, Default: df},
+			tfconfig.Variable{Type: tp, Name: k, Description: desc, Default: df},
 		)
 	}
 	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
@@ -89,6 +82,7 @@ func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
+	// Pass tf file path to tfconfig
 	module, _ := tfconfig.LoadModule(path)
 
 	modBlock := new(ModuleBlock)
@@ -107,6 +101,7 @@ func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 		return "", err
 	}
 	buffer := &bytes.Buffer{}
+	// Apply to template
 	block.Execute(buffer, modBlock)
 
 	return buffer.String(), nil
