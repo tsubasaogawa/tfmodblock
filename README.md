@@ -60,4 +60,7 @@ module "tfmodblock" {
 - Create test code
 - Auto indent
 - Expand `object`
-- VSCode Extension
+
+## Links
+
+- <https://github.com/tsubasaogawa/tfmodblock-vscode-extension>

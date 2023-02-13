@@ -1,6 +1,14 @@
 module "{{ .Name }}" {
     source = "path/to/{{ .Name }}"
-    {{ range $i, $var := .Variables }}
+
+    {{ range $i, $var := .Variables -}}
+    {{ if ne $var.Description "" -}}
+    // {{ $var.Description }}
+    {{ end -}}
+    {{ if ne $var.Default nil -}}
+    {{ $var.Name }} = {{ $var.Default -}}
+    {{ else -}}
     {{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}
-{{ end }}
+    {{ end }}
+    {{ end }}
 }

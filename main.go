@@ -10,24 +10,19 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
-// Variable is Terraform variable object.
-type Variable struct {
-	Type string
-	Name string
-}
-
-// ModuleBlock is an output text consisted of variables.
+// ModuleBlock includes output values consisted of variables.
 type ModuleBlock struct {
 	Name      string
-	Variables []Variable
+	Variables []tfconfig.Variable
 }
 
-const VERSION string = "0.0.5"
+const VERSION string = "0.0.6"
 
 var (
 	//go:embed module_block.tmpl
@@ -36,15 +31,26 @@ var (
 	vsc_tmpl string
 )
 
-// applyModuleBlock
-func applyModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable) {
+// constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
+func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, def bool) {
 	for k, v := range vars {
 		r := regexp.MustCompile(`\w+`)
+
 		tp := r.FindString(v.Type)
 		if tp == "" {
 			tp = v.Type
 		}
-		mb.Variables = append(mb.Variables, Variable{Type: tp, Name: k})
+		desc := v.Description
+
+		var df interface{}
+		// TODO: enable default for map and object as well
+		if def && v.Default != nil && (tp == "string" || tp == "number" || tp == "bool" || strings.HasPrefix(tp, "list(")) {
+			df = v.Default
+		}
+		mb.Variables = append(
+			mb.Variables,
+			tfconfig.Variable{Type: tp, Name: k, Description: desc, Default: df},
+		)
 	}
 	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
 }
@@ -71,17 +77,19 @@ func generateFuncMap() template.FuncMap {
 	}
 }
 
-// generateModuleBlock generates Terraform module block.
-func generateModuleBlock(path string, vscode bool) (string, error) {
+// printModuleBlock outputs Terraform module block.
+func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
+	// Pass tf file path to tfconfig
 	module, _ := tfconfig.LoadModule(path)
 
 	modBlock := new(ModuleBlock)
 	fullpath, _ := filepath.Abs(path)
 	modBlock.Name = filepath.Base(fullpath)
-	applyModuleBlock(modBlock, module.Variables)
+	// The result from tfconfig is used to construct modBlock
+	constructModuleBlock(modBlock, module.Variables, def)
 
 	_template := tmpl
 	if vscode {
@@ -93,6 +101,7 @@ func generateModuleBlock(path string, vscode bool) (string, error) {
 		return "", err
 	}
 	buffer := &bytes.Buffer{}
+	// Apply to template
 	block.Execute(buffer, modBlock)
 
 	return buffer.String(), nil
@@ -101,6 +110,7 @@ func generateModuleBlock(path string, vscode bool) (string, error) {
 func main() {
 	var (
 		v      = flag.Bool("v", false, "tfmodblock version")
+		def    = flag.Bool("default", true, "use default value if exists")
 		vscode = flag.Bool("vscode", false, "VSCode extension mode")
 	)
 	flag.Parse()
@@ -115,7 +125,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := generateModuleBlock(path, *vscode)
+	block, err := printModuleBlock(path, *def, *vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

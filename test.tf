@@ -3,7 +3,8 @@ variable "foo" {
 }
 
 variable "bar" {
-  type = number
+  type    = number
+  default = 123
 }
 
 variable "baz" {
@@ -11,9 +12,17 @@ variable "baz" {
 }
 
 variable "lorem" {
-  type = list(string)
+  type        = list(string)
+  description = "lorem description"
+  default     = ["lorem1", "lorem2"]
 }
 
 variable "ipsum" {
-  type = object({ a = string })
+  type    = object({ a = string, b = { b1 = number, b2 = list(string) } })
+  default = { a = "ipsum", b = { b1 = 1, b2 = ["ipsum1", "ipsum2"] } }
+}
+
+variable "dolor" {
+  type    = bool
+  default = false
 }
