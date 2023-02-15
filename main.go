@@ -19,6 +19,7 @@ import (
 // ModuleBlock includes output values consisted of variables.
 type ModuleBlock struct {
 	Name      string
+	Source    string
 	Variables []tfconfig.Variable
 }
 
@@ -87,6 +88,8 @@ func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 	modBlock := new(ModuleBlock)
 	fullpath, _ := filepath.Abs(path)
 	modBlock.Name = filepath.Base(fullpath)
+	cwd, _ := os.Getwd()
+	modBlock.Source, _ = filepath.Rel(cwd, fullpath)
 	// The result from tfconfig is used to construct modBlock
 	constructModuleBlock(modBlock, module.Variables, def)
 
