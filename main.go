@@ -22,9 +22,8 @@ type ModuleBlock struct {
 	Variables []tfconfig.Variable
 }
 
-const VERSION string = "0.0.6"
-
 var (
+	version string
 	//go:embed module_block.tmpl
 	tmpl string
 	//go:embed module_block_vscode.tmpl
@@ -116,7 +115,10 @@ func main() {
 	flag.Parse()
 
 	if *v {
-		fmt.Println(VERSION)
+		if version == "" {
+			version = "v0.0.0"
+		}
+		fmt.Println(version)
 		os.Exit(0)
 	}
 
