@@ -1,5 +1,5 @@
 module "{{ .Name }}" {
-    source = "path/to/{{ .Name }}"
+    source = "{{ .Source }}"
 
     {{ range $i, $var := .Variables -}}
     {{ if ne $var.Description "" -}}
