@@ -2,17 +2,17 @@
 
 ## Overview
 
-tfmodblock generates Terraform module block from variable blocks.
+tfmodblock generates Terraform module block HCL using variables from tf files.
 
 ## Install
 
-### Use install script
+### a. Use install script
 
 ```bash
 curl -H 'Accept: application/vnd.github.VERSION.raw' 'https://api.github.com/repos/tsubasaogawa/tfmodblock/contents/install.sh?ref=main' | bash
 ```
 
-### Download an archive
+### b. Download an archive
 
 Download an archive from [Releases](https://github.com/tsubasaogawa/tfmodblock/releases/latest) page.
 Extract it and copy the binary to your PATH.
@@ -26,7 +26,8 @@ variable "foo" {
 }
 
 variable "bar" {
-  type = number
+  type        = number
+  description = "this is bar"
 }
 
 variable "baz" {
@@ -34,7 +35,8 @@ variable "baz" {
 }
 
 variable "lorem" {
-  type = list(string)
+  type    = list(string)
+  default = ["lorem1", "lorem2"]
 }
 
 variable "ipsum" {
@@ -45,12 +47,13 @@ variable "ipsum" {
 ```hcl
 $ tfmodblock .
 module "tfmodblock" {
-    source = "path/to/module"
+    source = "."
+    // this is bar
     bar = 0
     baz = {}
     foo = ""
     ipsum = {}
-    lorem = []
+    lorem = [lorem1 lorem2]
     
 }
 ```
