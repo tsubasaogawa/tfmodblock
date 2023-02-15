@@ -115,6 +115,9 @@ func main() {
 	flag.Parse()
 
 	if *v {
+		if version == "" {
+			version = "v0.0.0"
+		}
 		fmt.Println(version)
 		os.Exit(0)
 	}
