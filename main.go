@@ -32,7 +32,7 @@ var (
 )
 
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
-func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, def bool) {
+func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool) {
 	for k, v := range vars {
 		r := regexp.MustCompile(`\w+`)
 
@@ -51,6 +51,9 @@ func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, d
 			mb.Variables,
 			tfconfig.Variable{Type: tp, Name: k, Description: desc, Default: df},
 		)
+	}
+	if !_sort {
+		return
 	}
 	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
 }
@@ -78,7 +81,7 @@ func generateFuncMap() template.FuncMap {
 }
 
 // printModuleBlock outputs Terraform module block.
-func printModuleBlock(path string, def bool, vscode bool) (string, error) {
+func printModuleBlock(path string, _sort bool, def bool, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
@@ -91,7 +94,7 @@ func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 	cwd, _ := os.Getwd()
 	modBlock.Source, _ = filepath.Rel(cwd, fullpath)
 	// The result from tfconfig is used to construct modBlock
-	constructModuleBlock(modBlock, module.Variables, def)
+	constructModuleBlock(modBlock, module.Variables, _sort, def)
 
 	_template := tmpl
 	if vscode {
@@ -111,6 +114,7 @@ func printModuleBlock(path string, def bool, vscode bool) (string, error) {
 
 func main() {
 	var (
+		_sort  = flag.Bool("sort", true, "sort results")
 		v      = flag.Bool("v", false, "tfmodblock version")
 		def    = flag.Bool("default", true, "use default value if exists")
 		vscode = flag.Bool("vscode", false, "VSCode extension mode")
@@ -130,7 +134,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := printModuleBlock(path, *def, *vscode)
+	block, err := printModuleBlock(path, *_sort, *def, *vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
