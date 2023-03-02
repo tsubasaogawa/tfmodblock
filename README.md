@@ -65,6 +65,10 @@ module "tfmodblock" {
 }
 ```
 
+## Help
+
+Run tfmodblock with `--help` option.
+
 ## Future works
 
 - Create test code
