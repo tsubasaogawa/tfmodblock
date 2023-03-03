@@ -31,6 +31,7 @@ var (
 	vsc_tmpl string
 )
 
+// getDefaultValue
 func getDefaultValue(_var *tfconfig.Variable, def bool, tp string) interface{} {
 	var df interface{}
 
