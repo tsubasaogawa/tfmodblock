@@ -31,22 +31,29 @@ var (
 	vsc_tmpl string
 )
 
+func getDefaultValue(_var *tfconfig.Variable, def bool, tp string) interface{} {
+	var df interface{}
+
+	// TODO: enable default for map and object as well
+	if def && _var.Default != nil && (tp == "string" || tp == "number" || tp == "bool" || strings.HasPrefix(tp, "list(")) {
+		df = _var.Default
+	}
+
+	return df
+}
+
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
 func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool) {
-	for k, v := range vars {
-		r := regexp.MustCompile(`\w+`)
+	r := regexp.MustCompile(`\w+`)
 
+	for k, v := range vars {
 		tp := r.FindString(v.Type)
 		if tp == "" {
 			tp = v.Type
 		}
 		desc := v.Description
+		df := getDefaultValue(v, def, tp)
 
-		var df interface{}
-		// TODO: enable default for map and object as well
-		if def && v.Default != nil && (tp == "string" || tp == "number" || tp == "bool" || strings.HasPrefix(tp, "list(")) {
-			df = v.Default
-		}
 		mb.Variables = append(
 			mb.Variables,
 			tfconfig.Variable{Type: tp, Name: k, Description: desc, Default: df},
