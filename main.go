@@ -80,8 +80,8 @@ func generateFuncMap() template.FuncMap {
 	}
 }
 
-// printModuleBlock outputs Terraform module block.
-func printModuleBlock(path string, _sort bool, def bool, vscode bool) (string, error) {
+// generateModuleBlockString returns Terraform module block string.
+func generateModuleBlockString(path string, _sort bool, def bool, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
@@ -134,7 +134,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := printModuleBlock(path, *_sort, *def, *vscode)
+	block, err := generateModuleBlockString(path, *_sort, *def, *vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
