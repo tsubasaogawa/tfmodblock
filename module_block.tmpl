@@ -1,19 +1,19 @@
 {{ define "variable" -}}
-    {{ if ne .Description "" -}}
-    // {{ .Description }}
-    {{ end -}}
-    {{ if ne .Default nil -}}
-    {{ .Name }} = {{ .Default -}}
-    {{ else -}}
-    {{ .Name }} = {{ convertTypeToLiteral .Type -}}
-    {{ end -}}
+  {{ if ne .Description "" -}}
+  // {{ .Description }}
+  {{ end -}}
+  {{ if ne .Default nil -}}
+  {{ .Name }} = {{ .Default -}}
+  {{ else -}}
+  {{ .Name }} = {{ convertTypeToLiteral .Type -}}
+  {{ end -}}
 {{- end }}
 
 {{- block "module" . -}}
 module "{{ .Name }}" {
-    source = "{{ .Source }}"
-    {{ range $i, $var := .Variables }}
-    {{ template "variable" $var -}}
+  source = "{{ .Source }}"
+  {{ range $i, $var := .Variables }}
+  {{ template "variable" $var -}}
 {{ end }}
 }
 {{ end -}}

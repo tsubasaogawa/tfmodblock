@@ -14,16 +14,18 @@ func TestMain(m *testing.M) {
 
 func TestGenerateModuleBlockString(t *testing.T) {
 	tests := map[string]struct {
-		vars  []byte
-		sort  bool
-		def   bool
-		needs []string
+		vars    []byte
+		sort    bool
+		def     bool
+		tabsize int
+		needs   []string
 	}{
 		"TypeString": {
-			vars:  []byte(`variable "foo" { type = string }`),
-			sort:  true,
-			def:   false,
-			needs: []string{"foo = \"\""},
+			vars:    []byte(`variable "foo" { type = string }`),
+			sort:    true,
+			def:     false,
+			tabsize: 4,
+			needs:   []string{"foo = \"\""},
 		},
 		"TypeStringWithDefaultValue": {
 			vars: []byte(`
@@ -32,15 +34,17 @@ func TestGenerateModuleBlockString(t *testing.T) {
 					default = "bar"
 				}
 			`),
-			sort:  true,
-			def:   true,
-			needs: []string{"foo = bar"}, // TODO: foo = "bar"
+			sort:    true,
+			def:     true,
+			tabsize: 4,
+			needs:   []string{"foo = bar"}, // TODO: foo = "bar"
 		},
 		"Description": {
-			vars:  []byte(`variable "foo" { description = "bar" }`),
-			sort:  true,
-			def:   true,
-			needs: []string{"// bar"},
+			vars:    []byte(`variable "foo" { description = "bar" }`),
+			sort:    true,
+			def:     true,
+			tabsize: 4,
+			needs:   []string{"// bar"},
 		},
 	}
 
@@ -48,7 +52,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			dir, _ := createTfFile(tt.vars)
 			defer os.RemoveAll(dir)
-			modblock, _ := generateModuleBlockString(dir, tt.sort, tt.def, false)
+			modblock, _ := generateModuleBlockString(dir, tt.sort, tt.def, tt.tabsize, false)
 			for _, need := range tt.needs {
 				if !strings.Contains(modblock, need) {
 					t.Errorf("modblock (the following) does not include `%s`:\n %s", need, modblock)

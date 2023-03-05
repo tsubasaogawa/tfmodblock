@@ -31,6 +31,8 @@ var (
 	vsc_tmpl string
 )
 
+const INDENT = "  "
+
 // getDefaultValue
 func getDefaultValue(_var *tfconfig.Variable, def bool, tp string) interface{} {
 	var df interface{}
@@ -43,8 +45,18 @@ func getDefaultValue(_var *tfconfig.Variable, def bool, tp string) interface{} {
 	return df
 }
 
+// indentByReplacingWords replaces string with space.
+func indentByReplacingWords(s string, size int, w string) string {
+	re := regexp.MustCompile("^" + w)
+	var result string
+	for _, l := range strings.Split(s, "\n") {
+		result = fmt.Sprintf("%s%s\n", result, re.ReplaceAllString(l, strings.Repeat(" ", size)))
+	}
+	return result
+}
+
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
-func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool) {
+func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int) {
 	r := regexp.MustCompile(`\w+`)
 
 	for k, v := range vars {
@@ -89,7 +101,7 @@ func generateFuncMap() template.FuncMap {
 }
 
 // generateModuleBlockString returns Terraform module block string.
-func generateModuleBlockString(path string, _sort bool, def bool, vscode bool) (string, error) {
+func generateModuleBlockString(path string, _sort bool, def bool, tabSize int, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
@@ -102,7 +114,7 @@ func generateModuleBlockString(path string, _sort bool, def bool, vscode bool) (
 	cwd, _ := os.Getwd()
 	modBlock.Source, _ = filepath.Rel(cwd, fullpath)
 	// The result from tfconfig is used to construct modBlock
-	constructModuleBlock(modBlock, module.Variables, _sort, def)
+	constructModuleBlock(modBlock, module.Variables, _sort, def, tabSize)
 
 	_template := tmpl
 	if vscode {
@@ -117,15 +129,16 @@ func generateModuleBlockString(path string, _sort bool, def bool, vscode bool) (
 	// Apply to template
 	block.Execute(buffer, modBlock)
 
-	return buffer.String(), nil
+	return indentByReplacingWords(buffer.String(), tabSize, INDENT), nil
 }
 
 func main() {
 	var (
-		_sort  = flag.Bool("sort", true, "sort results")
-		v      = flag.Bool("v", false, "tfmodblock version")
-		def    = flag.Bool("default", true, "use default value if exists")
-		vscode = flag.Bool("vscode", false, "VSCode extension mode")
+		_sort   = flag.Bool("sort", true, "sort results")
+		def     = flag.Bool("default", true, "use default value if exists")
+		tabSize = flag.Int("tabsize", 4, "tab size for indent")
+		v       = flag.Bool("v", false, "tfmodblock version")
+		vscode  = flag.Bool("vscode", false, "VSCode extension mode")
 	)
 	flag.Parse()
 
@@ -137,12 +150,17 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *tabSize < 0 {
+		fmt.Fprintln(os.Stderr, "tabsize must be >= 0")
+		os.Exit(1)
+	}
+
 	path := "."
 	if flag.NArg() > 0 {
 		path = flag.Arg(0)
 	}
 
-	block, err := generateModuleBlockString(path, *_sort, *def, *vscode)
+	block, err := generateModuleBlockString(path, *_sort, *def, *tabSize, *vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
