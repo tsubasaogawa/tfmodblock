@@ -1,10 +1,10 @@
-{{ range $i, $var := .Variables -}}
-{{ if ne $var.Description "" -}}
-// {{ $var.Description }}
+{{ range $i, $var := .Variables }}
+{{- if ne $var.Description "" }}
+  // {{ $var.Description -}}
 {{ end -}}
-{{ if ne $var.Default nil -}}
-{{ $var.Name }} = {{ $var.Default -}}
-{{ else -}}
-{{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}
-{{ end }}
-{{ end }}
+{{ if ne $var.Default nil }}
+  {{ $var.Name }} = {{ $var.Default -}}
+{{ else }}
+  {{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}
+{{ end -}}
+{{ end -}}
