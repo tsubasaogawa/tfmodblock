@@ -52,7 +52,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			dir, _ := createTfFile(tt.vars)
 			defer os.RemoveAll(dir)
-			modblock, _ := generateModuleBlockString(dir, tt.sort, tt.def, tt.tabsize, false)
+			modblock, _ := GenerateModuleBlockString(dir, tt.sort, tt.def, tt.tabsize, false)
 			for _, need := range tt.needs {
 				if !strings.Contains(modblock, need) {
 					t.Errorf("modblock (the following) does not include `%s`:\n %s", need, modblock)
