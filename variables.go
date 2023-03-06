@@ -10,8 +10,12 @@ import (
 func GetDefaultValue(_var *tfconfig.Variable, def bool, tp string) interface{} {
 	var df interface{}
 
+	if !def || _var.Default == nil {
+		return df
+	}
+
 	// TODO: enable default for map and object as well
-	if def && _var.Default != nil && (tp == "string" || tp == "number" || tp == "bool" || strings.HasPrefix(tp, "list(")) {
+	if tp == "string" || tp == "number" || tp == "bool" || strings.HasPrefix(tp, "list") {
 		df = _var.Default
 	}
 

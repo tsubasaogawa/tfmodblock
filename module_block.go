@@ -71,9 +71,6 @@ func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _
 	for k, v := range vars {
 		nm := k + strings.Repeat(" ", maxLen-len(k))
 		tp := r.FindString(v.Type)
-		if tp == "" {
-			tp = v.Type
-		}
 		desc := v.Description
 		df := GetDefaultValue(v, def, tp)
 
