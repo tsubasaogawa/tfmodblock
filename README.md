@@ -52,16 +52,16 @@ variable "ipsum" {
 ```
 
 ```hcl
-$ tfmodblock .
+$ tfmodblock --sort=false .
 module "tfmodblock" {
     source = "."
-
+    
+    foo   = a
     // this is bar
-    bar = 0
-    baz = {}
-    foo = ""
-    ipsum = {}
+    bar   = 0
+    baz   = {}
     lorem = [lorem1 lorem2]
+    ipsum = {}
 }
 ```
 
@@ -71,8 +71,6 @@ Run tfmodblock with `--help` option.
 
 ## Future works
 
-- Create test code
-- Auto indent
 - Expand `object`
 
 ## Links
