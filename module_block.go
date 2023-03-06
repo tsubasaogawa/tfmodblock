@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
@@ -65,8 +66,10 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, v
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
 func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int) {
 	r := regexp.MustCompile(`\w+`)
+	maxLen := getLongestKeySize(vars)
 
 	for k, v := range vars {
+		nm := k + strings.Repeat(" ", maxLen-len(k))
 		tp := r.FindString(v.Type)
 		if tp == "" {
 			tp = v.Type
@@ -76,13 +79,27 @@ func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _
 
 		mb.Variables = append(
 			mb.Variables,
-			tfconfig.Variable{Type: tp, Name: k, Description: desc, Default: df},
+			tfconfig.Variable{Type: tp, Name: nm, Description: desc, Default: df},
 		)
 	}
+
 	if !_sort {
 		return
 	}
+
 	sort.Slice(mb.Variables, func(i, j int) bool { return mb.Variables[i].Name < mb.Variables[j].Name })
+}
+
+// getLongestKeySize returns the longest key size in the map.
+func getLongestKeySize(vars map[string]*tfconfig.Variable) int {
+	max := 0
+	for key := range vars {
+		_len := len(key)
+		if _len > max {
+			max = _len
+		}
+	}
+	return max
 }
 
 // generateFuncMap returns FuncMap used in template.
