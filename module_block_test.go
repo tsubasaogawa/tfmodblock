@@ -37,7 +37,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			sort:    true,
 			def:     true,
 			tabsize: 4,
-			needs:   []string{"foo = bar"}, // TODO: foo = "bar"
+			needs:   []string{`foo = "bar"`},
 		},
 		"Description": {
 			vars:    []byte(`variable "foo" { description = "bar" }`),

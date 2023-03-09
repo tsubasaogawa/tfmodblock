@@ -5,6 +5,6 @@
 {{ if ne $var.Default nil }}
   {{ $var.Name }} = {{ $var.Default -}}
 {{ else }}
-  {{ $var.Name }} = {{ convertTypeToLiteral $var.Type -}}
+  {{ $var.Name }} = {{ getDefaultValueByType $var.Type -}}
 {{ end -}}
 {{ end -}}
