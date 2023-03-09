@@ -56,12 +56,12 @@ $ tfmodblock --sort=false .
 module "tfmodblock" {
     source = "."
     
-    foo   = a
+    foo   = "a"
     // this is bar
     bar   = 0
     baz   = {}
-    lorem = [lorem1 lorem2]
-    ipsum = {}
+    lorem = ["lorem1","lorem2"]
+    ipsum = {"a":"ipsum1"}
 }
 ```
 
@@ -71,7 +71,7 @@ Run tfmodblock with `--help` option.
 
 ## Future works
 
-- Expand `object`
+- TBA
 
 ## Links
 

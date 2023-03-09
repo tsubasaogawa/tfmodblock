@@ -18,5 +18,6 @@ variable "lorem" {
 }
 
 variable "ipsum" {
-  type = object({ a = string })
+  type    = object({ a = string })
+  default = { a = "ipsum1" }
 }
