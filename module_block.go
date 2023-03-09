@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -65,12 +64,11 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, v
 
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
 func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int) {
-	r := regexp.MustCompile(`\w+`)
 	maxLen := getLongestKeySize(vars)
 
 	for k, v := range vars {
 		nm := k + strings.Repeat(" ", maxLen-len(k))
-		tp := r.FindString(v.Type)
+		tp := v.Type
 		desc := v.Description
 		df := GetDefaultValue(v, def, tp)
 
@@ -102,21 +100,6 @@ func getLongestKeySize(vars map[string]*tfconfig.Variable) int {
 // generateFuncMap returns FuncMap used in template.
 func generateFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"convertTypeToLiteral": func(_type string) string {
-			switch _type {
-			case "string":
-				return "\"\""
-			case "number":
-				return "0"
-			case "list", "set", "tuple":
-				return "[]"
-			case "bool":
-				return "true/false"
-			case "object", "map":
-				return "{}"
-			default:
-				return "null"
-			}
-		},
+		"getDefaultValueByType": GetDefaultValueByType,
 	}
 }
