@@ -25,7 +25,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			sort:    true,
 			def:     false,
 			tabsize: 4,
-			needs:   []string{"foo = \"\""},
+			needs:   []string{`foo = ""`},
 		},
 		"TypeStringWithDefaultValue": {
 			vars: []byte(`
@@ -39,12 +39,73 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			tabsize: 4,
 			needs:   []string{`foo = "bar"`},
 		},
+		"TypeNumberWithDefaultValue": {
+			vars: []byte(`
+			    variable "foo" {
+					type = number
+					default = 100
+				}
+			`),
+			sort:    true,
+			def:     true,
+			tabsize: 4,
+			needs:   []string{`foo = 100`},
+		},
+		"TypeListWithDefaultValue": {
+			vars: []byte(`
+				variable "foo" {
+					type = list(string)
+					default = ["bar", "baz"]
+				}
+			`),
+			sort:    true,
+			def:     true,
+			tabsize: 4,
+			needs:   []string{`foo = ["bar","baz"]`},
+		},
+		"TypeMapWithDefaultValue": {
+			vars: []byte(`
+			    variable "foo" {
+					type = map(string)
+					default = {
+						foo = "bar"
+						baz = "qux"
+					}
+				}
+			`),
+			sort:    true,
+			def:     true,
+			tabsize: 4,
+			needs:   []string{`foo = {"baz":"qux","foo":"bar"}`},
+		},
+		"TypeObjectWithDefaultValue": {
+			vars: []byte(`
+				variable "foo" {
+					type = object({ bar = string, baz = number })
+					default = {
+						bar = "bar"
+						baz = 100
+					}
+				}
+			`),
+			sort:    true,
+			def:     true,
+			tabsize: 4,
+			needs:   []string{`foo = {"bar":"bar","baz":100}`},
+		},
 		"Description": {
 			vars:    []byte(`variable "foo" { description = "bar" }`),
 			sort:    true,
 			def:     true,
 			tabsize: 4,
 			needs:   []string{"// bar"},
+		},
+		"TabSize Is 8": {
+			vars:    []byte(`variable "foo" { type = string }`),
+			sort:    true,
+			def:     true,
+			tabsize: 8,
+			needs:   []string{strings.Repeat(" ", 8) + `foo = ""`},
 		},
 	}
 
