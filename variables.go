@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
+var RE_WORDS = regexp.MustCompile(`\w+`)
+
 // GetDefaultValue obtains the default value from `default` field.
 func GetDefaultValue(_var *tfconfig.Variable, def bool, tp string) string {
 	var df []byte
@@ -22,8 +24,7 @@ func GetDefaultValue(_var *tfconfig.Variable, def bool, tp string) string {
 
 // GetDefaultValueByType returns the default value considering type.
 func GetDefaultValueByType(_type string) string {
-	r := regexp.MustCompile(`\w+`)
-	tp := r.FindString(_type)
+	tp := RE_WORDS.FindString(_type)
 
 	switch tp {
 	case "string":

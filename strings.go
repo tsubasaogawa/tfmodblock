@@ -1,17 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
 
+const INDENT = "  "
+
+var RE = regexp.MustCompile("^" + INDENT)
+
 // IndentByReplacingWords replaces string with space.
-func IndentByReplacingWords(s string, size int, w string) string {
-	re := regexp.MustCompile("^" + w)
+func IndentByReplacingWords(s string, size int) string {
 	var result string
-	for _, l := range strings.Split(s, "\n") {
-		result = fmt.Sprintf("%s%s\n", result, re.ReplaceAllString(l, strings.Repeat(" ", size)))
+
+	lfCnt := strings.Count(s, "\n")
+	for i, l := range strings.Split(s, "\n") {
+		result = result + RE.ReplaceAllString(l, strings.Repeat(" ", size))
+		// do not insert lf when `l` is eol
+		if i != lfCnt {
+			result = result + "\n"
+		}
 	}
 	return result
 }
