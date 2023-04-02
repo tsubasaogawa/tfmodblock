@@ -21,8 +21,6 @@ var (
 	vsc_tmpl string
 )
 
-const INDENT = "  "
-
 // ModuleBlock includes output values consisted of variables.
 type ModuleBlock struct {
 	Name      string
@@ -59,7 +57,7 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, v
 	// Apply to template
 	block.Execute(buffer, modBlock)
 
-	return IndentByReplacingWords(buffer.String(), tabSize, INDENT), nil
+	return IndentByReplacingWords(buffer.String(), tabSize), nil
 }
 
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
