@@ -1,4 +1,4 @@
-# tfmodblock (alpha)
+# tfmodblock
 
 ## Overview
 
@@ -57,7 +57,7 @@ $ tfmodblock --sort=false .
 module "tfmodblock" {
     source = "."
     
-    foo   = "a"
+    foo   = ""
     // this is bar
     bar   = 0
     baz   = {}
