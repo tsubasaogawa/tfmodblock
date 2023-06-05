@@ -9,19 +9,23 @@ import (
 
 var (
 	version string
+
+	_sort, def, v, vscode bool
+	tabsize               int
 )
 
+func init() {
+	flag.BoolVar(&_sort, "sort", true, "sort results")
+	flag.BoolVar(&def, "default", true, "use default value if exists")
+	flag.IntVar(&tabsize, "tabsize", 4, "tab size for indent")
+	flag.BoolVar(&v, "v", false, "tfmodblock version")
+	flag.BoolVar(&vscode, "vscode", false, "VSCode extension mode")
+}
+
 func main() {
-	var (
-		_sort   = flag.Bool("sort", true, "sort results")
-		def     = flag.Bool("default", true, "use default value if exists")
-		tabSize = flag.Int("tabsize", 4, "tab size for indent")
-		v       = flag.Bool("v", false, "tfmodblock version")
-		vscode  = flag.Bool("vscode", false, "VSCode extension mode")
-	)
 	flag.Parse()
 
-	if *v {
+	if v {
 		if version == "" {
 			version = "v0.0.0"
 		}
@@ -29,7 +33,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *tabSize < 0 {
+	if tabsize < 0 {
 		fmt.Fprintln(os.Stderr, "tabsize must be >= 0")
 		os.Exit(1)
 	}
@@ -39,7 +43,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := GenerateModuleBlockString(path, *_sort, *def, *tabSize, *vscode)
+	block, err := GenerateModuleBlockString(path, _sort, def, tabsize, vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
