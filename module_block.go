@@ -29,7 +29,7 @@ type ModuleBlock struct {
 }
 
 // GenerateModuleBlockString returns Terraform module block string.
-func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, vscode bool) (string, error) {
+func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, desc bool, vscode bool) (string, error) {
 	if !tfconfig.IsModuleDir(path) {
 		return "", fmt.Errorf("given path does not contain tf files")
 	}
@@ -42,7 +42,7 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, v
 	cwd, _ := os.Getwd()
 	modBlock.Source, _ = filepath.Rel(cwd, fullpath)
 	// The result from tfconfig is used to construct modBlock
-	constructModuleBlock(modBlock, module.Variables, _sort, def, tabSize)
+	constructModuleBlock(modBlock, module.Variables, _sort, def, tabSize, desc)
 
 	_template := tmpl
 	if vscode {
@@ -61,13 +61,16 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, v
 }
 
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
-func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int) {
+func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int, useDesc bool) {
 	maxLen := getLongestKeySize(vars)
 
 	for k, v := range vars {
 		nm := k + strings.Repeat(" ", maxLen-len(k))
 		tp := v.Type
 		desc := v.Description
+		if !useDesc {
+			desc = ""
+		}
 		df := GetDefaultValue(v, def, tp)
 
 		mb.Variables = append(
