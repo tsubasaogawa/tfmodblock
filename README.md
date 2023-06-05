@@ -11,7 +11,7 @@ tfmodblock generates Terraform module block HCL using variables from tf files.
 - Insert a value using `default` attribute
 - Insert a description
 
-## Install
+## Install & Update
 
 ### a. Use install script
 
