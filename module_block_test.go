@@ -17,6 +17,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 		vars    []byte
 		sort    bool
 		def     bool
+		desc    bool
 		tabsize int
 		needs   []string
 	}{
@@ -24,6 +25,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			vars:    []byte(`variable "foo" { type = string }`),
 			sort:    true,
 			def:     false,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{`foo = ""`},
 		},
@@ -36,6 +38,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{`foo = "bar"`},
 		},
@@ -48,6 +51,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{`foo = 100`},
 		},
@@ -60,6 +64,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{`foo = ["bar","baz"]`},
 		},
@@ -75,6 +80,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{`foo = {"baz":"qux","foo":"bar"}`},
 		},
@@ -90,20 +96,41 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{`foo = {"bar":"bar","baz":100}`},
 		},
 		"Description": {
-			vars:    []byte(`variable "foo" { description = "bar" }`),
+			vars: []byte(`
+			    variable "foo" {
+					type        = string
+					description = "bar"
+				}
+			`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 4,
 			needs:   []string{"// bar"},
+		},
+		"No Description": {
+			vars: []byte(`
+			    variable "foo" {
+					type        = string
+					description = "bar"
+				}
+			`),
+			sort:    true,
+			def:     true,
+			desc:    false,
+			tabsize: 4,
+			needs:   []string{""},
 		},
 		"TabSize Is 8": {
 			vars:    []byte(`variable "foo" { type = string }`),
 			sort:    true,
 			def:     true,
+			desc:    true,
 			tabsize: 8,
 			needs:   []string{strings.Repeat(" ", 8) + `foo = ""`},
 		},
@@ -113,7 +140,7 @@ func TestGenerateModuleBlockString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			dir, _ := createTfFile(tt.vars)
 			defer os.RemoveAll(dir)
-			modblock, _ := GenerateModuleBlockString(dir, tt.sort, tt.def, tt.tabsize, false)
+			modblock, _ := GenerateModuleBlockString(dir, tt.sort, tt.def, tt.tabsize, tt.desc, true)
 			for _, need := range tt.needs {
 				if !strings.Contains(modblock, need) {
 					t.Errorf("modblock (the following) does not include `%s`:\n %s", need, modblock)

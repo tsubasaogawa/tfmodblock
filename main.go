@@ -10,16 +10,17 @@ import (
 var (
 	version string
 
-	_sort, def, v, vscode bool
-	tabsize               int
+	_sort, def, v, desc, vscode bool
+	tabsize                     int
 )
 
 func init() {
 	flag.BoolVar(&_sort, "sort", true, "sort results")
 	flag.BoolVar(&def, "default", true, "use default value if exists")
-	flag.IntVar(&tabsize, "tabsize", 4, "tab size for indent")
 	flag.BoolVar(&v, "v", false, "tfmodblock version")
+	flag.BoolVar(&desc, "description", true, "insert a variable description")
 	flag.BoolVar(&vscode, "vscode", false, "VSCode extension mode")
+	flag.IntVar(&tabsize, "tabsize", 4, "tab size for indent")
 }
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := GenerateModuleBlockString(path, _sort, def, tabsize, vscode)
+	block, err := GenerateModuleBlockString(path, _sort, def, tabsize, desc, vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
