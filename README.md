@@ -68,7 +68,7 @@ module "tfmodblock" {
 
 ## Help
 
-Run tfmodblock with `--help` option.
+[Run tfmodblock with `--help` option.](./command_help.md)
 
 ## Future works
 
