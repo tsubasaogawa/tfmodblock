@@ -1,6 +1,6 @@
 {{ range $i, $var := .Variables }}
 {{- if ne $var.Description "" }}
-  // {{ $var.Description -}}
+{{ desc2comment $var.Description -}}
 {{ end -}}
 {{ if ne $var.Default nil }}
   {{ $var.Name }} = {{ $var.Default -}}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -19,6 +20,8 @@ var (
 	tmpl string
 	//go:embed module_block_vscode.tmpl
 	vsc_tmpl string
+
+	REGEX_HAT = regexp.MustCompile("^")
 )
 
 // ModuleBlock includes output values consisted of variables.
@@ -102,5 +105,16 @@ func getLongestKeySize(vars map[string]*tfconfig.Variable) int {
 func generateFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"getDefaultValueByType": GetDefaultValueByType,
+		"desc2comment":          desc2comment,
 	}
+}
+
+// desc2comment adds comment `//` at the start of each lines
+func desc2comment(desc string) string {
+	var result string
+	for _, l := range strings.Split(desc, "\n") {
+		result = result + "\n" + REGEX_HAT.ReplaceAllString(l, INDENT+"// ")
+	}
+
+	return strings.TrimPrefix(result, "\n")
 }
