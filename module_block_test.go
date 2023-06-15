@@ -113,6 +113,22 @@ func TestGenerateModuleBlockString(t *testing.T) {
 			tabsize: 4,
 			needs:   []string{"// bar"},
 		},
+		"MultiLineDescription": {
+			vars: []byte(`
+			    variable "foo" {
+					type        = string
+					description = <<EOD
+bar
+baz
+				    EOD
+				}
+			`),
+			sort:    true,
+			def:     true,
+			desc:    true,
+			tabsize: 4,
+			needs:   []string{"// bar", "// baz"},
+		},
 		"No Description": {
 			vars: []byte(`
 			    variable "foo" {

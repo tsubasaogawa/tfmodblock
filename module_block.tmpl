@@ -1,19 +1,19 @@
 {{ define "variable" -}}
-  {{ if ne .Description "" -}}
-  // {{ .Description }}
+  {{- if ne .Description "" }}
+{{ desc2comment .Description -}}
   {{ end -}}
-  {{ if ne .Default nil -}}
+  {{ if ne .Default nil }}
   {{ .Name }} = {{ .Default -}}
-  {{ else -}}
+  {{ else }}
   {{ .Name }} = {{ getDefaultValueByType .Type -}}
   {{ end -}}
-{{- end }}
+{{ end -}}
 
 {{- block "module" . -}}
 module "{{ .Name }}" {
   source = "{{ .Source }}"
-  {{ range $i, $var := .Variables }}
+  {{ range $i, $var := .Variables -}}
   {{ template "variable" $var -}}
-{{ end }}
+{{- end }}
 }
 {{ end -}}

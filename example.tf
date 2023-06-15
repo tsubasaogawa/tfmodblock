@@ -9,7 +9,11 @@ variable "bar" {
 }
 
 variable "baz" {
-  type = map(number)
+  type        = map(number)
+  description = <<EOD
+    this is heredoc
+    description
+  EOD
 }
 
 variable "lorem" {
