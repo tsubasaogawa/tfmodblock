@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	mb "github.com/tsubasaogawa/tfmodblock/module_block"
 )
 
 var (
@@ -44,7 +46,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := GenerateModuleBlockString(path, _sort, def, tabsize, desc, vscode)
+	block, err := mb.GenerateModuleBlockString(path, _sort, def, tabsize, desc, vscode)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
