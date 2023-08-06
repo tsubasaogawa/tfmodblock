@@ -45,7 +45,7 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, d
 	cwd, _ := os.Getwd()
 	modBlock.Source, _ = filepath.Rel(cwd, fullpath)
 	// The result from tfconfig is used to construct modBlock
-	constructModuleBlock(modBlock, module.Variables, _sort, def, tabSize, desc)
+	modBlock.construct(module.Variables, _sort, def, tabSize, desc)
 
 	_template := tmpl
 	if vscode {
@@ -64,7 +64,7 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, d
 }
 
 // constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
-func constructModuleBlock(mb *ModuleBlock, vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int, useDesc bool) {
+func (mb *ModuleBlock) construct(vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int, useDesc bool) {
 	maxLen := getLongestKeySize(vars)
 
 	for k, v := range vars {
