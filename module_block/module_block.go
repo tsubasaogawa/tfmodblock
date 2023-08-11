@@ -32,7 +32,6 @@ type ModuleBlock struct {
 	Variables                  []tfconfig.Variable
 }
 
-//
 func NewModuleBlock(path string, _sort bool, def bool, tabSize int, useDesc bool, vscode bool) *ModuleBlock {
 	// Pass tf file path to tfconfig
 	module, _ := tfconfig.LoadModule(path)
@@ -56,6 +55,7 @@ func NewModuleBlock(path string, _sort bool, def bool, tabSize int, useDesc bool
 	return &mb
 }
 
+// Do returns module block string.
 func (mb *ModuleBlock) Do() (string, error) {
 	if !tfconfig.IsModuleDir(mb.path) {
 		return "", fmt.Errorf("given path does not contain tf files")
@@ -79,7 +79,7 @@ func (mb *ModuleBlock) Do() (string, error) {
 	return IndentByReplacingWords(buffer.String(), mb.tabSize), nil
 }
 
-//
+// buildVariables converts map object created by tfconfig to module block variables.
 func (mb *ModuleBlock) buildVariables(vars map[string]*tfconfig.Variable) {
 	maxLen := getLongestKeySize(vars)
 

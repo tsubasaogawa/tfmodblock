@@ -12,7 +12,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestGenerateModuleBlockString(t *testing.T) {
+func TestDo(t *testing.T) {
 	tests := map[string]struct {
 		vars    []byte
 		sort    bool
@@ -156,10 +156,10 @@ baz
 		t.Run(name, func(t *testing.T) {
 			dir, _ := createTfFile(tt.vars)
 			defer os.RemoveAll(dir)
-			modblock, _ := GenerateModuleBlockString(dir, tt.sort, tt.def, tt.tabsize, tt.desc, true)
+			mb, _ := NewModuleBlock(dir, tt.sort, tt.def, tt.tabsize, tt.desc, true).Do()
 			for _, need := range tt.needs {
-				if !strings.Contains(modblock, need) {
-					t.Errorf("modblock (the following) does not include `%s`:\n %s", need, modblock)
+				if !strings.Contains(mb, need) {
+					t.Errorf("modblock (the following) does not include `%s`:\n %s", need, mb)
 				}
 			}
 		})
