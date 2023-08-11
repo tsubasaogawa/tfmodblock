@@ -26,29 +26,44 @@ var (
 
 // ModuleBlock includes output values consisted of variables.
 type ModuleBlock struct {
-	Name      string
-	Source    string
-	Variables []tfconfig.Variable
+	path, Name, Source         string
+	sort, def, useDesc, vscode bool
+	tabSize                    int
+	Variables                  []tfconfig.Variable
 }
 
-// GenerateModuleBlockString returns Terraform module block string.
-func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, desc bool, vscode bool) (string, error) {
-	if !tfconfig.IsModuleDir(path) {
-		return "", fmt.Errorf("given path does not contain tf files")
-	}
+//
+func NewModuleBlock(path string, _sort bool, def bool, tabSize int, useDesc bool, vscode bool) *ModuleBlock {
 	// Pass tf file path to tfconfig
 	module, _ := tfconfig.LoadModule(path)
-
-	modBlock := new(ModuleBlock)
 	fullpath, _ := filepath.Abs(path)
-	modBlock.Name = filepath.Base(fullpath)
 	cwd, _ := os.Getwd()
-	modBlock.Source, _ = filepath.Rel(cwd, fullpath)
-	// The result from tfconfig is used to construct modBlock
-	modBlock.construct(module.Variables, _sort, def, tabSize, desc)
+	source, _ := filepath.Rel(cwd, fullpath)
 
+	mb := ModuleBlock{
+		path:    path,
+		Name:    filepath.Base(fullpath),
+		Source:  source,
+		sort:    _sort,
+		def:     def,
+		useDesc: useDesc,
+		vscode:  vscode,
+		tabSize: tabSize,
+	}
+
+	mb.buildVariables(module.Variables)
+
+	return &mb
+}
+
+func (mb *ModuleBlock) Do() (string, error) {
+	if !tfconfig.IsModuleDir(mb.path) {
+		return "", fmt.Errorf("given path does not contain tf files")
+	}
+
+	// The result from tfconfig is used to construct modBlock
 	_template := tmpl
-	if vscode {
+	if mb.vscode {
 		_template = vsc_tmpl
 	}
 
@@ -56,25 +71,26 @@ func GenerateModuleBlockString(path string, _sort bool, def bool, tabSize int, d
 	if err != nil {
 		return "", err
 	}
+
 	buffer := &bytes.Buffer{}
 	// Apply to template
-	block.Execute(buffer, modBlock)
+	block.Execute(buffer, mb)
 
-	return IndentByReplacingWords(buffer.String(), tabSize), nil
+	return IndentByReplacingWords(buffer.String(), mb.tabSize), nil
 }
 
-// constructModuleBlock constructs ModuleBlock from tfconfig.Variable.
-func (mb *ModuleBlock) construct(vars map[string]*tfconfig.Variable, _sort bool, def bool, tabSize int, useDesc bool) {
+//
+func (mb *ModuleBlock) buildVariables(vars map[string]*tfconfig.Variable) {
 	maxLen := getLongestKeySize(vars)
 
 	for k, v := range vars {
 		nm := k + strings.Repeat(" ", maxLen-len(k))
 		tp := v.Type
 		desc := v.Description
-		if !useDesc {
+		if !mb.useDesc {
 			desc = ""
 		}
-		df := GetDefaultValue(v, def, tp)
+		df := GetDefaultValue(v, mb.def, tp)
 
 		mb.Variables = append(
 			mb.Variables,
@@ -82,7 +98,7 @@ func (mb *ModuleBlock) construct(vars map[string]*tfconfig.Variable, _sort bool,
 		)
 	}
 
-	if !_sort {
+	if !mb.sort {
 		return
 	}
 

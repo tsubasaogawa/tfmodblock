@@ -46,7 +46,7 @@ func main() {
 		path = flag.Arg(0)
 	}
 
-	block, err := mb.GenerateModuleBlockString(path, _sort, def, tabsize, desc, vscode)
+	block, err := mb.NewModuleBlock(path, _sort, def, tabsize, desc, vscode).Do()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
